@@ -1,0 +1,110 @@
+<% content_for :subheader_title do %>
+  <%= @carrier.display_name %>
+  <% end %>
+<% content_for :subheader_toolbar do %>
+
+  <div class="kt-subheader__toolbar">
+    <div class="kt-subheader__wrapper">
+      <ul class="nav nav-tabs nav-tabs-bold nav-tabs-line nav-tabs-line-brand m-0" role="tablist">
+        <% @accounts.each do |account| %>
+        <li class="nav-item">
+          <a class="nav-link p-1" data-toggle="tab" href="#kt_portlet_tabs_1_<%= account.id %>_content" role="tab">
+            <%= account.name %>
+          </a>
+        </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>
+
+<div class="tab-content">
+  <% @accounts.each do |account| %>
+  <% settings = account.send(@carrier.settings_field) %>
+  <div class="tab-pane" id="kt_portlet_tabs_1_<%= account.id %>_content" role="tabpanel">
+
+    <%= form_for :settings, url: "/accounts/#{account.id}/update_carrier_settings" do |f| %>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="kt-portlet">
+          <div class="kt-portlet__head">
+            <div class="kt-portlet__head-label">
+              <h3 class="kt-portlet__head-title">
+                Configurações gerais
+              </h3>
+            </div>
+          </div>
+
+          <div class="kt-portlet__body">
+            <%= hidden_field_tag 'carrier_id', @carrier.id %>
+            <%= f.fields_for 'general' do |ff| %>
+            <div class="row">
+              <% @carrier.settings['general'].each do |setting| %>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <%= ff.label setting %>
+                  <%= ff.text_field setting, value: settings.dig('general',setting), class:'form-control' %>
+                </div>
+              </div>
+              <% end %>
+            </div>
+            <% end %>
+          </div>
+
+
+          <div class="kt-portlet__foot">
+            <div class="kt-form__actions">
+            <%= f.submit "Salvar", class:"btn btn-primary" %>
+            <%= link_to 'Voltar', :back, class:"btn btn-secondary", style: "background-color:#ffffff"  %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+        <div class="col-md-6">
+          <div class="kt-portlet">
+            <div class="kt-portlet__head">
+              <div class="kt-portlet__head-label">
+                <h3 class="kt-portlet__head-title">
+                  Envios
+                </h3>
+              </div>
+              <div class="kt-portlet__head-toolbar">
+                <div class="kt-portlet__head-toolbar-wrapper">
+
+                </div>
+              </div>
+            </div>
+
+            <div class="kt-portlet__body" kt-hidden-height="163" style="">
+              <div class="kt-portlet__content">
+              <%= link_to "/azul/#{account.id}/send_plp", class: "btn btn-light btn-elevate-hover btn-pill", method: :post do %>
+                <i class="flaticon2-rocket-2"></i> Enviar pedidos para EDI da Azul Cargo
+              <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+
+      </div>
+    </div>
+
+    <% end %>
+
+  </div>
+  <% end %>
+</div>
+
+<script>
+$('.nav-link').first().addClass('active');
+$('.tab-pane').first().addClass('active');
+</script>
