@@ -24,6 +24,7 @@
   <div class="tab-pane" id="kt_portlet_tabs_1_<%= account.id %>_content" role="tabpanel">
 
     <%= form_for :settings, url: "/accounts/#{account.id}/update_carrier_settings" do |f| %>
+    <%= hidden_field_tag 'account_id', account.id %>
 
     <div class="row">
       <div class="col-md-6">
@@ -48,6 +49,13 @@
                 </div>
               </div>
               <% end %>
+            </div>
+            <div class="row">
+              <div class="col-md-2">
+              <%= link_to "javascript:;", class:"connect" do %>
+                <button type="button" class="btn btn-sm btn-default"><i class="la la-refresh"></i> Conectar</button>
+              <% end %>
+              </div>
             </div>
             <% end %>
           </div>
@@ -103,6 +111,37 @@
   </div>
   <% end %>
 </div>
+
+<script>
+function handleData(data) {
+    if (data["HasErrors"]){
+      alert(data["ErrorText"]);
+    }
+    else {
+      alert("Conectado!");
+    }
+}
+
+$('.connect').click(function(){
+  form  = $(this).parents('form')
+  email    = form.find('input[name="settings[general][Email]"]').val();
+  password = form.find('input[name="settings[general][Senha]"]').val();
+  cpf_cnpj = form.find('input[name="settings[general][CpfCnpj]"]').val();
+  account  = form.find('input[name="account_id"]').val();
+  data = {
+    email:    email,
+    password: password,
+    cpf_cnpj: cpf_cnpj,
+    account:  account,
+  }
+  $.ajax({
+    type: "POST",
+    url: "<%= azul_authenticate_user_ajax_url %>",
+    data: data,
+    success : handleData,
+  });
+})
+</script>
 
 <script>
 $('.nav-link').first().addClass('active');

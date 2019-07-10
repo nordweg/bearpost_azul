@@ -19,7 +19,7 @@ class Carrier::Azul < Carrier
 
     def shipment_menu_links
       [
-        ['Enviar NFe para Azul', ':id/azul/new'],
+        ['Enviar NFe para Azul', ':id/azul/send_to_azul'],
         ['Checar AWB', '/']
       ]
     end
@@ -40,20 +40,21 @@ class Carrier::Azul < Carrier
       response = request.post("http://hmg.onlineapp.com.br/WebAPI_EdiAzulCargo/api/NFe/Enviar?token=#{token}",body)
     end
 
-    def validar_usuario(account)
-      body     = account.azul_settings['general']
-      response = request.post("WebAPI_EdiAzulCargo/api/Autenticacao/ValidarUsuarioPortalClienteEdi", body)
-      token    = response.body["Value"]
-
-      account.azul_settings['token'] = token
-      account.azul_settings['token_expire_date'] = DateTime.now + 7.hours
-      account.save
-
-      {
-        "Email": "lucaskuhn@azulcargo.com.br",
-        "Senha": "123456",
-        "CpfCnpj": "13536856000128"
+    def authenticate_user(account, user, password, cpf_cnpj)
+      credentials = {
+          "usuário" => user,
+            "senha" => password,
+          "CpfCnpj" => cpf_cnpj
       }
+
+      response    = request.post("WebAPI_EdiAzulCargo/api/Autenticacao/ValidarUsuarioPortalClienteEdi", credentials)
+      if response.status == 200
+        token       = response.body["Value"]
+        account.azul_settings['token'] = token
+        account.azul_settings['token_expire_date'] = DateTime.now + 7.hours
+        account.save
+      end
+      response
     end
 
     private

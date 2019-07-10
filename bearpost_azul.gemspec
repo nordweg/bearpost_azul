@@ -45,4 +45,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "faraday"
   spec.add_development_dependency "faraday_middleware"
+  spec.add_development_dependency "devise"
 end
