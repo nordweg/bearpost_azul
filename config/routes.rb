@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   resources :shipments do
     member do
-      post 'azul/new',            to: "azul#new"
       post 'azul/send_to_azul',   to: "azul#send_to_azul"
     end
   end

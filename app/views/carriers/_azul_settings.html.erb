@@ -1,21 +1,21 @@
 <% content_for :subheader_title do %>
-  <%= @carrier.display_name %>
-  <% end %>
+<%= @carrier.display_name %>
+<% end %>
 <% content_for :subheader_toolbar do %>
 
-  <div class="kt-subheader__toolbar">
-    <div class="kt-subheader__wrapper">
-      <ul class="nav nav-tabs nav-tabs-bold nav-tabs-line nav-tabs-line-brand m-0" role="tablist">
-        <% @accounts.each do |account| %>
-        <li class="nav-item">
-          <a class="nav-link p-1" data-toggle="tab" href="#kt_portlet_tabs_1_<%= account.id %>_content" role="tab">
-            <%= account.name %>
-          </a>
-        </li>
-        <% end %>
-      </ul>
-    </div>
+<div class="kt-subheader__toolbar">
+  <div class="kt-subheader__wrapper">
+    <ul class="nav nav-tabs nav-tabs-bold nav-tabs-line nav-tabs-line-brand m-0" role="tablist">
+      <% @accounts.each do |account| %>
+      <li class="nav-item">
+        <a class="nav-link p-1" data-toggle="tab" href="#kt_portlet_tabs_1_<%= account.id %>_content" role="tab">
+          <%= account.name %>
+        </a>
+      </li>
+      <% end %>
+    </ul>
   </div>
+</div>
 <% end %>
 
 <div class="tab-content">
@@ -32,7 +32,7 @@
           <div class="kt-portlet__head">
             <div class="kt-portlet__head-label">
               <h3 class="kt-portlet__head-title">
-                Configurações gerais
+                Configurações de acesso
               </h3>
             </div>
           </div>
@@ -52,9 +52,9 @@
             </div>
             <div class="row">
               <div class="col-md-2">
-              <%= link_to "javascript:;", class:"connect" do %>
+                <%= link_to "javascript:;", class:"connect" do %>
                 <button type="button" class="btn btn-sm btn-default"><i class="la la-refresh"></i> Conectar</button>
-              <% end %>
+                <% end %>
               </div>
             </div>
             <% end %>
@@ -63,38 +63,37 @@
 
           <div class="kt-portlet__foot">
             <div class="kt-form__actions">
-            <%= f.submit "Salvar", class:"btn btn-primary" %>
-            <%= link_to 'Voltar', :back, class:"btn btn-secondary", style: "background-color:#ffffff"  %>
+              <%= f.submit "Salvar", class:"btn btn-primary" %>
+              <%= link_to 'Voltar', :back, class:"btn btn-secondary", style: "background-color:#ffffff"  %>
             </div>
           </div>
 
         </div>
       </div>
 
-        <div class="col-md-6">
-          <div class="kt-portlet">
-            <div class="kt-portlet__head">
-              <div class="kt-portlet__head-label">
-                <h3 class="kt-portlet__head-title">
-                  Envios
-                </h3>
-              </div>
-              <div class="kt-portlet__head-toolbar">
-                <div class="kt-portlet__head-toolbar-wrapper">
-
-                </div>
-              </div>
+      <div class="col-md-6">
+        <div class="kt-portlet">
+          <div class="kt-portlet__head">
+            <div class="kt-portlet__head-label">
+              <h3 class="kt-portlet__head-title">
+                Sincronização de pedidos
+              </h3>
             </div>
+            <div class="kt-portlet__head-toolbar">
+              <div class="kt-portlet__head-toolbar-wrapper">
 
-            <div class="kt-portlet__body" kt-hidden-height="163" style="">
-              <div class="kt-portlet__content">
-              <%= link_to "/azul/#{account.id}/send_plp", class: "btn btn-light btn-elevate-hover btn-pill", method: :post do %>
-                <i class="flaticon2-rocket-2"></i> Enviar pedidos para EDI da Azul Cargo
-              <% end %>
               </div>
             </div>
           </div>
+
+          <div class="kt-portlet__body" kt-hidden-height="163" style="">
+            <div class="kt-portlet__content">
+              <p>Enviar todos os pedidos com status "pronto para envio" para a Azul Cargo</p>
+              <%= link_to "Enviar", "/azul/#{account.id}/send_plp", class: "btn btn-secondary" %>
+            </div>
+          </div>
         </div>
+      </div>
 
 
 
@@ -113,15 +112,6 @@
 </div>
 
 <script>
-function handleData(data) {
-    if (data["HasErrors"]){
-      alert(data["ErrorText"]);
-    }
-    else {
-      alert("Conectado!");
-    }
-}
-
 $('.connect').click(function(){
   form  = $(this).parents('form')
   email    = form.find('input[name="settings[general][Email]"]').val();
@@ -132,13 +122,21 @@ $('.connect').click(function(){
     email:    email,
     password: password,
     cpf_cnpj: cpf_cnpj,
-    account:  account,
+    account:  account
   }
-  $.ajax({
-    type: "POST",
+  var request = $.ajax({
     url: "<%= azul_authenticate_user_ajax_url %>",
-    data: data,
-    success : handleData,
+    method: "POST",
+    dataType: 'json',
+    data: data
+  });
+  request.done(function( msg ) {
+    if ( msg["HasErrors"] == false ) {
+      alert("Conectado com sucesso");
+    }
+  });
+  request.fail(function( jqXHR, textStatus ) {
+    alert( "Request failed: " + textStatus );
   });
 })
 </script>

@@ -46,4 +46,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "faraday"
   spec.add_development_dependency "faraday_middleware"
   spec.add_development_dependency "devise"
+  spec.add_development_dependency "active_model_serializers"
 end

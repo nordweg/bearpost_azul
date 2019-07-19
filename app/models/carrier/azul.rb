@@ -1,16 +1,18 @@
 class Carrier::Azul < Carrier
   class << self
-    def settings
+
+    def shipping_methods
       {
-        'general': ['Email','Senha','CpfCnpj'],
-        'shipping_methods': {
-          'Standart': ['id_base']
-        }
-      }.with_indifferent_access
+        'Standart': ['id_base']
+      }
+    end
+
+    def general_settings
+      ['Email','Senha','CpfCnpj']
     end
 
     def tracking_url
-      "http://www.azulcargo.com.br/Rastreio.aspx"
+      "http://www.azulcargo.com.br/Rastreio.aspx?n={tracking}&tipoAwb=Nacional"
     end
 
     def get_tracking_number(shipment)
@@ -19,36 +21,32 @@ class Carrier::Azul < Carrier
 
     def shipment_menu_links
       [
-        ['Enviar NFe para Azul', ':id/azul/send_to_azul'],
         ['Checar AWB', '/']
       ]
     end
 
-    def ready_to_ship?(shipment)
-      if !shipment.settings['sent_to_azul']
-        false
-      else
-        true
-      end
-    end
-
-    def send_to_azul(account, encoded_xml)
-      token = account.azul_settings['token']
-      body  = {
-        "xml": encoded_xml,
-      }
-      response = request.post("http://hmg.onlineapp.com.br/WebAPI_EdiAzulCargo/api/NFe/Enviar?token=#{token}",body)
+    def send_to_carrier(shipment)
+      check_authentication(shipment)
+      check_invoice_xml(shipment)
+      account      = shipment.account
+      encoded_xml  = Base64.strict_encode64(shipment.invoice_xml)
+      response     = send_to_azul(account,encoded_xml)
+      shipment.sent_to_carrier = true
+      shipment.status = 'shipped'
+      shipment.save
+      response
     end
 
     def authenticate_user(account, user, password, cpf_cnpj)
       credentials = {
-          "usuário" => user,
-            "senha" => password,
+          "Email" => user,
+          "Senha" => password,
           "CpfCnpj" => cpf_cnpj
       }
-
       response    = request.post("WebAPI_EdiAzulCargo/api/Autenticacao/ValidarUsuarioPortalClienteEdi", credentials)
-      if response.status == 200
+      if response.body["HasErrors"]
+        raise Exception.new("Azul - Authentication Error: #{response.body["ErrorText"]}")
+      else
         token       = response.body["Value"]
         account.azul_settings['token'] = token
         account.azul_settings['token_expire_date'] = DateTime.now + 7.hours
@@ -58,6 +56,32 @@ class Carrier::Azul < Carrier
     end
 
     private
+
+    def check_authentication(shipment)
+      account           = shipment.account
+      settings          = shipment.account.azul_settings
+      token_expire_date = settings['token_expire_date'].try(:to_datetime)
+      user     = settings['user']
+      password = settings['password']
+      cpf_cnpj = settings['cpf_cnpj']
+      authenticate_user(account, user, password, cpf_cnpj) if !token_expire_date || token_expire_date < DateTime.now
+    end
+
+    def check_invoice_xml(shipment)
+      raise Exception.new("Azul - Invoice XML required") if shipment.invoice_xml.blank?
+    end
+
+    def send_to_azul(account, encoded_xml)
+      token = account.azul_settings['token']
+      body  = {
+        "xml": encoded_xml,
+      }
+      response = request.post("http://hmg.onlineapp.com.br/WebAPI_EdiAzulCargo/api/NFe/Enviar?token=#{token}",body)
+      if response.body["HasErrors"]
+        raise Exception.new(response.body["ErrorText"])
+      end
+      response
+    end
 
     def request
       Faraday.new(url: "http://hmg.onlineapp.com.br/") do |conn|
