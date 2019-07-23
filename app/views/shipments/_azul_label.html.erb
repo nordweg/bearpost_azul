@@ -41,10 +41,12 @@ h4 {
     Pacote <%= shipment.packages.index(package) + 1 %>/<%= total_packages %><br>
   </div>
 
-  <div class='text-center mt20'>
-    <%= shipment.tracking_number %><br>
-    <%= image_tag(Barby::Code128.new(shipment.tracking_number).to_image(xdim:2).to_data_url) %>
-  </div>
+  <% if shipment.tracking_number.present? %>
+    <div class='text-center mt20'>
+      <%= shipment.tracking_number %><br>
+      <%= image_tag(Barby::Code128.new(shipment.tracking_number).to_image(xdim:2).to_data_url) %>
+    </div>
+  <% end %>
 
   <hr>
 
