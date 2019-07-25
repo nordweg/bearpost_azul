@@ -30,7 +30,6 @@ h4 {
   margin-bottom: 10px;
   margin-top: 10px;
 }
-
 </style>
 
 <div class="label">
@@ -42,10 +41,10 @@ h4 {
   </div>
 
   <% if shipment.tracking_number.present? %>
-    <div class='text-center mt20'>
-      <%= shipment.tracking_number %><br>
-      <%= image_tag(Barby::Code128.new(shipment.tracking_number).to_image(xdim:2).to_data_url) %>
-    </div>
+  <div class='text-center mt20'>
+    <%= shipment.tracking_number %><br>
+    <%= image_tag(Barby::Code128.new(shipment.tracking_number).to_image(xdim:2).to_data_url) %>
+  </div>
   <% end %>
 
   <hr>
@@ -57,7 +56,9 @@ h4 {
     <li><%= "#{shipment.recipient_complement}," if shipment.recipient_complement.present? %> <%= shipment.recipient_neighborhood %></li>
     <li><strong><%= shipment.recipient_zip %></strong> <%= shipment.recipient_city %> / <%= shipment.recipient_state %></li>
 
+    <% if shipment.recipient_zip.present? %>
     <%= image_tag(Barby::Code128.new(shipment.recipient_zip.delete("^0-9")).to_image(xdim:2).to_data_url) %>
+    <% end %>
   </ul>
 
   <hr>
