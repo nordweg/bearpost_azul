@@ -1,10 +1,8 @@
 Rails.application.routes.draw do
-  resources :shipments do
-    member do
-      post 'azul/send_to_azul',   to: "azul#send_to_azul"
-    end
+  namespace :azul do
+    post "authenticate_user_ajax"
+    post "send_to_carrier"
   end
-  post  "azul/:shipment_id/send_shipment",  to: "azul#send_shipment"
+
   post  "azul/:shipment_id/get_awb",        to: "azul#get_awb"
-  post  "azul/authenticate_user_ajax",      to: "azul#authenticate_user_ajax"
 end

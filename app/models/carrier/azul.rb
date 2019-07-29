@@ -25,15 +25,30 @@ class Carrier::Azul < Carrier
       ]
     end
 
-    def send_to_carrier(shipment)
-      check_authentication(shipment)
-      check_invoice_xml(shipment)
-      account      = shipment.account
-      encoded_xml  = Base64.strict_encode64(shipment.invoice_xml)
-      response     = send_to_azul(account,encoded_xml)
-      shipment.sent_to_carrier = true
-      shipment.status = 'shipped'
-      shipment.save
+    def send_to_carrier(shipments)
+      response = []
+      shipments.each do |shipment|
+        begin
+          account = shipment.account
+          check_authentication(account)
+          check_invoice_xml(shipment)
+          encoded_xml = Base64.strict_encode64(shipment.invoice_xml)
+          faraday_response = send_to_azul(account,encoded_xml)
+          message = faraday_response.body["HasErrors"] ? faraday_response.body["ErrorText"] : faraday_response.body["Value"]
+          shipment.update(sent_to_carrier:true) unless faraday_response.body["HasErrors"]
+          response << {
+            shipment: shipment,
+            success: shipment.sent_to_carrier,
+            message: message
+          }
+        rescue  Exception => e
+          response << {
+            shipment: shipment,
+            success: shipment.sent_to_carrier,
+            message: e.message
+          }
+        end
+      end
       response
     end
 
@@ -57,9 +72,8 @@ class Carrier::Azul < Carrier
 
     private
 
-    def check_authentication(shipment)
-      account           = shipment.account
-      settings          = shipment.account.azul_settings
+    def check_authentication(account)
+      settings          = account.azul_settings
       token_expire_date = settings['token_expire_date'].try(:to_datetime)
       user     = settings['user']
       password = settings['password']
@@ -77,10 +91,6 @@ class Carrier::Azul < Carrier
         "xml": encoded_xml,
       }
       response = request.post("http://hmg.onlineapp.com.br/WebAPI_EdiAzulCargo/api/NFe/Enviar?token=#{token}",body)
-      if response.body["HasErrors"]
-        raise Exception.new(response.body["ErrorText"])
-      end
-      response
     end
 
     def request

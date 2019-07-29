@@ -89,22 +89,12 @@
           <div class="kt-portlet__body" kt-hidden-height="163" style="">
             <div class="kt-portlet__content">
               <p>Enviar todos os pedidos com status "pronto para envio" para a Azul Cargo</p>
-              <%= link_to "Enviar", "/azul/#{account.id}/send_plp", class: "btn btn-secondary" %>
+              <%= link_to "Enviar", azul_send_to_carrier_path(account:account), class: "btn btn-secondary", method:'post' %>
             </div>
           </div>
         </div>
       </div>
-
-
-
     </div>
-
-    <div class="row">
-      <div class="col-lg-6">
-
-      </div>
-    </div>
-
     <% end %>
 
   </div>

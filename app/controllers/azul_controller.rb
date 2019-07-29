@@ -3,7 +3,7 @@ class AzulController < ApplicationController
 
   def authenticate_user_ajax
     begin
-      account  = Account.find(params["account"])
+      account  = current_company.accounts.find(params["account"])
       user     = params["email"]
       password = params["password"]
       cpf_cnpj = params["cpf_cnpj"]
@@ -14,4 +14,19 @@ class AzulController < ApplicationController
     end
   end
 
+  def send_to_carrier
+    carrier   = Carrier::Azul
+    account   = Account.find(params["account"])
+    shipments = account.shipments.ready_to_ship.where(carrier_name:carrier.id)
+    begin
+      shipments.each do |shipment|
+        carrier.send_to_carrier(shipment)
+        shipment.update(sent_to_carrier:true)
+      end
+      flash[:success] = 'Todos pedidos foram sincronizados'
+    rescue Exception => e
+      flash[:error] = e.message
+    end
+    redirect_to edit_carrier_path(carrier.id)
+  end
 end
