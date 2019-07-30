@@ -33,8 +33,10 @@ class Carrier::Azul < Carrier
       response = request.get("WebAPI_EdiAzulCargo/api/Ocorrencias/Consultar?token=#{token}&ChaveNFE=#{nfe_key}")
       if response.body["HasErrors"]
         raise Exception.new("Azul - #{response.body["ErrorText"]}")
+      elsif response.body["Value"].empty?
+        raise Exception.new("Ainda não há informações de rasteamento. Tente mais tarde.")
       else
-        response.body.dig("Value").try(:first).dig("Awb")
+        response.body["Value"].try(:first).dig("Awb")
       end
     end
 
