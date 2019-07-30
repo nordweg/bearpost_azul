@@ -16,7 +16,7 @@ class Carrier::Azul < Carrier
     end
 
     def get_tracking_number(shipment)
-      shipment.shipment_number
+      nil
     end
 
     def shipment_menu_links
