@@ -20,6 +20,9 @@ class Carrier::Azul < Carrier
       get_awb(shipment)
     end
 
+    def check_for_updates
+    end
+
     def get_awb(shipment)
       xml = Nokogiri::XML(shipment.invoice_xml)
       str = xml.at_css('infNFe').attribute("Id").try(:content)
