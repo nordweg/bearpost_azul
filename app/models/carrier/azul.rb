@@ -16,13 +16,23 @@ class Carrier::Azul < Carrier
     end
 
     def get_tracking_number(shipment)
-      nil
+      check_invoice_xml(shipment)
+      get_awb(shipment)
     end
 
-    def shipment_menu_links
-      [
-        ['Checar AWB', '/']
-      ]
+    def get_awb(shipment)
+      xml = Nokogiri::XML(shipment.invoice_xml)
+      str = xml.at_css('infNFe').attribute("Id").try(:content)
+      nfe_key = str[3..-1]
+      account = shipment.account
+      check_authentication(account)
+      token = account.azul_settings['token']
+      response = request.get("WebAPI_EdiAzulCargo/api/Ocorrencias/Consultar?token=#{token}&ChaveNFE=#{nfe_key}")
+      if response.body["HasErrors"]
+        raise Exception.new("Azul - #{response.body["ErrorText"]}")
+      else
+        response.body.dig("Value").try(:first).dig("Awb")
+      end
     end
 
     def send_to_carrier(shipments)
@@ -75,14 +85,14 @@ class Carrier::Azul < Carrier
     def check_authentication(account)
       settings          = account.azul_settings
       token_expire_date = settings['token_expire_date'].try(:to_datetime)
-      user     = settings['user']
-      password = settings['password']
-      cpf_cnpj = settings['cpf_cnpj']
+      user     = settings['general']['Email']
+      password = settings['general']['Senha']
+      cpf_cnpj = settings['general']['CpfCnpj']
       authenticate_user(account, user, password, cpf_cnpj) if !token_expire_date || token_expire_date < DateTime.now
     end
 
     def check_invoice_xml(shipment)
-      raise Exception.new("Azul - Invoice XML required") if shipment.invoice_xml.blank?
+      raise Exception.new("Azul - É necessário o XML da nota fiscal") if shipment.invoice_xml.blank?
     end
 
     def send_to_azul(account, encoded_xml)
@@ -90,7 +100,7 @@ class Carrier::Azul < Carrier
       body  = {
         "xml": encoded_xml,
       }
-      response = request.post("http://hmg.onlineapp.com.br/WebAPI_EdiAzulCargo/api/NFe/Enviar?token=#{token}",body)
+      response = request.post("WebAPI_EdiAzulCargo/api/NFe/Enviar?token=#{token}",body)
     end
 
     def request
