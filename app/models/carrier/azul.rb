@@ -21,6 +21,9 @@ class Carrier::Azul < Carrier
     end
 
     def check_for_updates
+      shipments.each do |shipment|
+        get_updates(shipment)
+      end
     end
 
     def get_awb(shipment)
@@ -31,13 +34,43 @@ class Carrier::Azul < Carrier
       check_authentication(account)
       token = account.azul_settings['token']
       response = request.get("WebAPI_EdiAzulCargo/api/Ocorrencias/Consultar?token=#{token}&ChaveNFE=#{nfe_key}")
+      check_response(response)
+      response.body.dig("Value",0,"Awb")
+    end
+
+    def get_delivery_updates(shipment)
+      check_authentication(shipment.account)
+      check_tracking_number(shipment)
+      token = shipment.account.azul_settings['token']
+      response = request.get("WebAPI_EdiAzulCargo/api/Ocorrencias/Consultar?Token=#{token}&AWB=#{shipment.tracking_number}")
+      check_response(response)
+      events = response.body.dig("Value",0,"Ocorrencias")
+      events.each do |event|
+        history = shipment.histories.find_by(description:event["Descricao"])
+        next if history.present?
+
+        description = "#{event["Descricao"]} - #{event["UnidadeMunicipio"]}, #{event["UnidadeUF"]}"
+        shipment.histories.create(
+          description: description,
+          city: event["UnidadeMunicipio"],
+          state: event["UnidadeUF"],
+          date: event["DataHora"],
+          changed_by: 'Azul',
+          category: 'carrier'
+        )
+      end
+    end
+
+    def check_response(response)
       if response.body["HasErrors"]
         raise Exception.new("Azul - #{response.body["ErrorText"]}")
       elsif response.body["Value"].empty?
         raise Exception.new("Ainda não há informações de rasteamento. Tente mais tarde.")
-      else
-        response.body["Value"].try(:first).dig("Awb")
       end
+    end
+
+    def check_tracking_number(shipment)
+      raise Exception.new("Azul - Este envio não tem um AWB") if shipment.tracking_number.blank?
     end
 
     def send_to_carrier(shipments)

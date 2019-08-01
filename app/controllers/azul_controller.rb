@@ -17,7 +17,7 @@ class AzulController < ApplicationController
   def send_to_carrier # Button in settings to send shipments to azul
     carrier   = Carrier::Azul
     account   = Account.find(params["account"])
-    shipments = account.shipments.ready_to_ship.where(carrier_name:carrier.id)
+    shipments = carrier.shipment.ready_to_ship.where(account:account)
     begin
       shipments.each do |shipment|
         carrier.send_to_carrier(shipment)
