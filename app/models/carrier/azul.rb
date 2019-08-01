@@ -48,7 +48,6 @@ class Carrier::Azul < Carrier
       events.each do |event|
         history = shipment.histories.find_by(description:event["Descricao"])
         next if history.present?
-
         description = "#{event["Descricao"]} - #{event["UnidadeMunicipio"]}, #{event["UnidadeUF"]}"
         shipment.histories.create(
           description: description,
@@ -70,7 +69,7 @@ class Carrier::Azul < Carrier
     end
 
     def check_tracking_number(shipment)
-      raise Exception.new("Azul - Este envio não tem um AWB") if shipment.tracking_number.blank?
+      raise Exception.new("Azul - Este envio não tem um código de rastreio (AWB)") if shipment.tracking_number.blank?
     end
 
     def send_to_carrier(shipments)
