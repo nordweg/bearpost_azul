@@ -51,23 +51,24 @@ h4 {
 
   <h4>DESTINATÁRIO</h4>
   <ul class="address">
-    <li><%= shipment.recipient_first_name %> <%= shipment.recipient_last_name %></li>
-    <li><%= shipment.recipient_street %>, <%= shipment.recipient_number %></li>
-    <li><%= "#{shipment.recipient_complement}," if shipment.recipient_complement.present? %> <%= shipment.recipient_neighborhood %></li>
-    <li><strong><%= shipment.recipient_zip %></strong> <%= shipment.recipient_city %> / <%= shipment.recipient_state %></li>
+    <li><%= shipment.first_name %> <%= shipment.last_name %></li>
+    <li><%= shipment.street %>, <%= shipment.number %></li>
+    <li><%= "#{shipment.complement}," if shipment.complement.present? %> <%= shipment.neighborhood %></li>
+    <li><strong><%= shipment.zip %></strong> <%= shipment.city %> / <%= shipment.state %></li>
 
-    <% if shipment.recipient_zip.present? %>
-    <%= image_tag(Barby::Code128.new(shipment.recipient_zip.delete("^0-9")).to_image(xdim:2).to_data_url) %>
+    <% if shipment.zip.present? %>
+    <%= image_tag(Barby::Code128.new(shipment.zip.delete("^0-9")).to_image(xdim:2).to_data_url) %>
     <% end %>
   </ul>
 
   <hr>
 
   <h4>REMETENTE</h4>
+  <% account = shipment.account %>
   <ul class="address sender-address">
-    <li><%= shipment.sender_first_name %> <%= shipment.sender_last_name %></li>
-    <li><%= shipment.sender_street %>, <%= shipment.sender_number %></li>
-    <li><%= "#{shipment.sender_complement}," if shipment.sender_complement.present? %> <%= shipment.sender_neighborhood %></li>
-    <li><strong><%= shipment.sender_zip %></strong> <%= shipment.sender_city %> / <%= shipment.sender_state %></li>
+    <li><%= account.name %></li>
+    <li><%= account.street %>, <%= account.number %></li>
+    <li><%= "#{account.complement}," if account.complement.present? %> <%= account.neighborhood %></li>
+    <li><strong><%= account.zip %></strong> <%= account.city %> / <%= account.state %></li>
   </ul>
 </div>
