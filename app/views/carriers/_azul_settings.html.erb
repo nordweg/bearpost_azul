@@ -79,17 +79,28 @@
                 Sincronização de pedidos
               </h3>
             </div>
-            <div class="kt-portlet__head-toolbar">
-              <div class="kt-portlet__head-toolbar-wrapper">
-
-              </div>
-            </div>
           </div>
 
           <div class="kt-portlet__body" kt-hidden-height="163" style="">
             <div class="kt-portlet__content">
               <p>Enviar todos os pedidos com status "pronto para envio" para a Azul Cargo</p>
               <%= link_to "Enviar", azul_send_to_carrier_path(account:account), class: "btn btn-secondary", method:'post' %>
+            </div>
+          </div>
+        </div>
+        <div class="kt-portlet">
+          <div class="kt-portlet__head">
+            <div class="kt-portlet__head-label">
+              <h3 class="kt-portlet__head-title">
+                Obter rastreios
+              </h3>
+            </div>
+          </div>
+
+          <div class="kt-portlet__body" kt-hidden-height="163" style="">
+            <div class="kt-portlet__content">
+              <p>Checar AWB dos pedidos que não tem rastreio definido</p>
+              <%= link_to "Atualizar", azul_get_awbs_path(account:account), class: "btn btn-secondary" %>
             </div>
           </div>
         </div>

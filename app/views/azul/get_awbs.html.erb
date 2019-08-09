@@ -1,0 +1,35 @@
+<% content_for :subheader_title do %>
+Atualizando AWB dos pedidos que ainda estão sem rastreio...
+<% end %>
+
+
+<div class="kt-portlet">
+  <div class="kt-portlet__head">
+    <div class="kt-portlet__head-label">
+      <h3 class="kt-portlet__head-title">
+        Envios
+      </h3>
+    </div>
+  </div>
+
+  <div class="kt-portlet__body">
+    <div class="kt-portlet__content">
+      <table class="table table-hover table-head-noborder">
+        <thead>
+          <tr>
+            <th>Envio</th>
+            <th>Mensagem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @results.each do |result| %>
+          <tr>
+            <td><%= link_to "#{result[:shipment].shipment_number} - #{result[:shipment].full_name}", shipment_path(result[:shipment]), class: "kt-link" %> </td>
+            <td><%= result[:message] %></td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

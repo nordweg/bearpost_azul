@@ -1,7 +1,14 @@
+GIT
+  remote: https://github.com/nordweg/bearpost_correios.git
+  revision: 4a63a132091221ac9f90c6a3b1a06ec356def659
+  specs:
+    bearpost_correios (0.1.22)
+      rails (~> 5.2)
+
 PATH
   remote: .
   specs:
-    bearpost_azul (0.1.1)
+    bearpost_azul (0.1.2)
       rails (~> 5.2)
 
 GEM
@@ -206,6 +213,7 @@ DEPENDENCIES
   awesome_print
   barby
   bearpost_azul!
+  bearpost_correios!
   byebug
   chunky_png
   coffee-rails (~> 4.2)

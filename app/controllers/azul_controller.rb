@@ -29,4 +29,23 @@ class AzulController < ApplicationController
     end
     redirect_to edit_carrier_path(carrier.id)
   end
+
+  def get_awbs
+    @results = []
+    Carrier::Azul.shipments.where(tracking_number:nil,account:params[:account]).each do |shipment|
+      begin
+        awb = Carrier::Azul.get_awb(shipment)
+        shipment.update(tracking_number: awb)
+        message = "Rastreio atualizado: AWB #{awb}"
+      rescue Exception => e
+        message = e.message
+      end
+      result_hash = {
+        shipment: shipment,
+        message: message
+      }
+      @results << result_hash
+    end
+  end
+
 end
