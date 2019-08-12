@@ -64,7 +64,7 @@ class Carrier::Azul < Carrier
       if response.body["HasErrors"]
         raise Exception.new("Azul - #{response.body["ErrorText"]}")
       elsif response.body["Value"].empty?
-        raise Exception.new("Ainda não há informações de rasteamento. Tente mais tarde.")
+        raise Exception.new("Ainda não há informações de rastreamento. Tente mais tarde.")
       end
     end
 
