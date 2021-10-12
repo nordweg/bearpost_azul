@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "wkhtmltopdf-binary"
   spec.add_development_dependency "listen"
   spec.add_development_dependency 'pg', '>= 0.18', '< 2.0'
-  spec.add_development_dependency 'puma', '~> 3.7'
+  spec.add_development_dependency 'puma', '~> 5.5'
   spec.add_development_dependency 'sass-rails', '~> 5.0'
   spec.add_development_dependency 'uglifier', '>= 1.3.0'
   spec.add_development_dependency 'coffee-rails', '~> 4.2'
